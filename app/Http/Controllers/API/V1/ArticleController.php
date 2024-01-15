@@ -2,22 +2,37 @@
 
 namespace App\Http\Controllers\API\V1;
 
+use App\Models\Article;
 use App\Http\Resources\V1\ArticleResource;
 use App\Http\Resources\V1\ArticleCollection;
+use App\Http\Services\Filters\V1\ArticlesFilter;
 
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Models\Article;
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Http\Resources\Json\ResourceCollection;
 
 class ArticleController extends Controller
 {
+    private $page_size = 20;
+
     /**
      * Display a listing of the resource.
      */
-    public function index() : ArticleCollection
+    public function index(Request $request) : ResourceCollection
     {
+        $elo_query = Article::query();
+
+        // Check logical operator in request query
+        $mode = $request->query('mode') ?? 'and';
+        if (gettype($mode) != 'string') $mode = 'and';
+
+        // Use filter service for build query filters
+        $filter = new ArticlesFilter();
+        $filter->queryBuilder($request, $elo_query, $mode);
+
         return new ArticleCollection(
-            Article::paginate()
+            $elo_query->paginate($this->page_size)
         );
     }
 
@@ -32,9 +47,13 @@ class ArticleController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Article $article) : ArticleResource
+    public function show(string $id) : JsonResource
     {
-        return new ArticleResource($article);
+        return new ArticleResource(
+            Article::query()
+                ->whereKey($id)
+                ->first()
+        );
     }
 
     /**
