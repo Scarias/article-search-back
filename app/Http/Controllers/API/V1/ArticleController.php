@@ -2,20 +2,23 @@
 
 namespace App\Http\Controllers\API\V1;
 
+use App\Http\Resources\V1\ArticleResource;
+use App\Http\Resources\V1\ArticleCollection;
+
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Article;
-use Illuminate\Database\Eloquent\Collection;
 
 class ArticleController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index() : Collection
+    public function index() : ArticleCollection
     {
-        return Article::with('user:id,name')
-            ->get();
+        return new ArticleCollection(
+            Article::paginate()
+        );
     }
 
     /**
@@ -29,11 +32,9 @@ class ArticleController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id) : Collection
+    public function show(Article $article) : ArticleResource
     {
-        return Article::with('user:id,name')
-            ->where('id', $id)
-            ->get();
+        return new ArticleResource($article);
     }
 
     /**
