@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -19,6 +20,7 @@ class ArticleFactory extends Factory
         return [
             'title' => fake()->words(rand(5, 15), true),
             'content' => fake()->sentence(rand(50, 150)),
+            'user_id' => User::factory(),
         ];
     }
 }
