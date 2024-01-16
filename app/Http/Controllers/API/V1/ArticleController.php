@@ -6,6 +6,8 @@ use App\Models\Article;
 use App\Http\Resources\V1\ArticleResource;
 use App\Http\Resources\V1\ArticleCollection;
 use App\Http\Services\Filters\V1\ArticlesFilter;
+use App\Http\Requests\V1\StoreArticleRequest;
+use App\Http\Requests\V1\UpdateArticleRequest;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -39,9 +41,13 @@ class ArticleController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreArticleRequest $request) : JsonResource
     {
-        //
+        $validated = $request->validated();
+
+        return new ArticleResource(
+            Article::create($validated)
+        );
     }
 
     /**
@@ -50,25 +56,32 @@ class ArticleController extends Controller
     public function show(string $id) : JsonResource
     {
         return new ArticleResource(
-            Article::query()
-                ->whereKey($id)
-                ->first()
+            Article::find($id)
         );
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateArticleRequest $request, string $id) : JsonResource
     {
-        //
+        $validated = $request->validated();
+
+        $article = Article::find($id);
+        $article->update($validated);
+        $article->save();
+
+        return new ArticleResource($article);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(string $id) : JsonResource
     {
-        //
+        $article = Article::find($id);
+        $article->delete();
+
+        return new ArticleResource($article);
     }
 }
