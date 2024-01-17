@@ -11,7 +11,7 @@ class UpdateArticleRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->tokenCan('crud-articles');
     }
 
     /**
@@ -26,12 +26,21 @@ class UpdateArticleRequest extends FormRequest
                 return [
                     'title' => 'required|max:250',
                     'content' => 'required',
+                    'user_id' => 'required',
                 ];
             default: // PATCH
                 return [
                     'title' => 'nullable',
                     'content' => 'nullable',
+                    'user_id' => 'required',
                 ];
         }
+    }
+
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'user_id' => $this->user()->id,
+        ]);
     }
 }

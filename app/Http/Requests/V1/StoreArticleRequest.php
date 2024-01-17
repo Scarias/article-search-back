@@ -11,7 +11,7 @@ class StoreArticleRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->tokenCan('crud-articles');
     }
 
     /**
@@ -33,9 +33,8 @@ class StoreArticleRequest extends FormRequest
      */
     protected function prepareForValidation()
     {
-        $to_merge = [];
-        if (isset($this->createdBy)) $to_merge['user_id'] = $this->createdBy;
-
-        $this->merge($to_merge);
+        $this->merge([
+            'user_id' => $this->user()->id,
+        ]);
     }
 }

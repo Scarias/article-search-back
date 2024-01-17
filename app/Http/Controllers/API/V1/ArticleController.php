@@ -8,10 +8,10 @@ use App\Http\Resources\V1\ArticleCollection;
 use App\Http\Services\Filters\V1\ArticlesFilter;
 use App\Http\Requests\V1\StoreArticleRequest;
 use App\Http\Requests\V1\UpdateArticleRequest;
-
 use App\Http\Controllers\Controller;
+
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
 class ArticleController extends Controller
@@ -41,47 +41,48 @@ class ArticleController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreArticleRequest $request) : JsonResource
+    public function store(StoreArticleRequest $request) : JsonResponse
     {
         $validated = $request->validated();
 
-        return new ArticleResource(
-            Article::create($validated)
-        );
+        return (new ArticleResource(Article::create($validated)))
+            ->response();
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id) : JsonResource
+    public function show(string $id) : JsonResponse
     {
-        return new ArticleResource(
-            Article::find($id)
-        );
+        return (new ArticleResource(Article::findOrFail($id)))
+            ->response();
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateArticleRequest $request, string $id) : JsonResource
+    public function update(UpdateArticleRequest $request, string $id) : JsonResponse
     {
         $validated = $request->validated();
 
-        $article = Article::find($id);
+        $article = Article::findOrFail($id);
+
         $article->update($validated);
         $article->save();
 
-        return new ArticleResource($article);
+        return (new ArticleResource($article))
+            ->response();
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id) : JsonResource
+    public function destroy(string $id) : JsonResponse
     {
         $article = Article::find($id);
         $article->delete();
 
-        return new ArticleResource($article);
+        return (new ArticleResource($article))
+            ->response();
     }
 }
